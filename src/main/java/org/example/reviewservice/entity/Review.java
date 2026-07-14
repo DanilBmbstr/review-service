@@ -6,8 +6,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,17 +21,21 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(       check = @CheckConstraint(
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
+    @Column(  name = "rating",     check = @CheckConstraint(
         name = "rating_range_constraint",
         constraint = "rating >= 0 AND rating <= 10"
     ))
     private int rating;
 
 
-    @Column(length = 2500)
+    @Column(name = "text",length = 2500)
     private String text;
 
-    @Column(updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", updatable = false, nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

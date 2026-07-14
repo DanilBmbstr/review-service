@@ -1,5 +1,6 @@
 package org.example.reviewservice.service;
 
+import org.example.reviewservice.dto.request.CreateReviewRequest;
 import org.example.reviewservice.entity.Review;
 import org.example.reviewservice.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,13 @@ public class ReviewService {
         return reviewRepository.findAll();
     }
 
-    public Review createReview(Review review) {
-        return reviewRepository.save(review);
+    public Review createReview(CreateReviewRequest review, long userId) {
+        Review mappedReview = new Review();
+        mappedReview.setUserId(userId);
+        mappedReview.setText(review.getText());
+        mappedReview.setRating(review.getRating());
+        mappedReview.setProductId(review.getProductId());
+        return reviewRepository.save(mappedReview);
     }
 
 
