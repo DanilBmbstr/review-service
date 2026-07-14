@@ -1,4 +1,19 @@
-package org.example.reviewservice.dto;
+package org.example.reviewservice.dto.response;
 
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+
+@Getter
+@Setter
 public class CreateReviewResponse {
+    private Long id;
+    private String text;
+    private int rating;
+    private long productId;
+    private long userId;
+    private LocalDateTime createdAt;
 }
