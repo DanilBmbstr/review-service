@@ -17,7 +17,8 @@ public class CreateReviewRequest {
 
     @Min(1)
     @Max(10)
-    private int rating;
+    @NotNull
+    private Integer rating;
 
     @NotNull
     private long productId;

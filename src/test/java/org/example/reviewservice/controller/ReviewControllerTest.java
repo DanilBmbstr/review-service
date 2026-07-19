@@ -2,6 +2,8 @@ package org.example.reviewservice.controller;
 
 
 import org.example.reviewservice.config.SecurityConfig;
+import org.example.reviewservice.dto.request.CreateReviewRequest;
+import org.example.reviewservice.entity.Review;
 import org.example.reviewservice.filter.JwtAuthenticationFilter;
 import org.example.reviewservice.mapper.ReviewMapper;
 import org.example.reviewservice.service.ReviewService;
@@ -15,13 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,6 +39,7 @@ public class ReviewControllerTest {
 
     @MockitoBean
     ReviewService mockReviewService;
+
 
 
     private final String TEST_KEY = "EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE";
@@ -63,7 +69,70 @@ public class ReviewControllerTest {
         when(mockReviewService.getAllReviews()).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/reviews").header("Authorization",
-                        "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhIiwiZXhwIjoxNzg2NzM0MDAwfQ.VOxZ1IuMmAEV1wbbyJjuVHhRjCrgqjgb2JHrE4Mxka8"))
+                        "Bearer " + JwtTestUtil.generateToken("STRING")))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+
+
+
+
+    @Test
+    public void createReview_validInput_shouldReturnCreated() throws Exception{
+
+
+        Long userId = (long)1;
+
+        Review savedReview = new Review();
+        savedReview.setId(userId);
+        savedReview.setText("reviewText");
+        savedReview.setRating(1);
+        savedReview.setProductId((long)1);
+        savedReview.setUserId((long)1);
+        when(mockReviewService.createReview(any(CreateReviewRequest.class), eq(userId))).thenReturn(savedReview);
+
+
+
+        String json = "{\"text\":\"reviewText\",\"rating\":1,\"productId\":1}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                        "Bearer " +  JwtTestUtil.generateToken(userId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("1"))
+                .andExpect(jsonPath("$.productId").value("1"))
+                .andExpect(jsonPath("$.rating").value("1"))
+                .andExpect(jsonPath("$.text").value("reviewText"));
+
+
+
+        verify(mockReviewService, times(1)).createReview(any(CreateReviewRequest.class), eq(userId));
+
+
+    }
+
+
+
+
+    @Test
+    public void createReview_InvalidToken_shouldReturn403() throws Exception{
+        String json = "{\"text\":\"reviewText\",\"rating\":1,\"productId\":1}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                                "Bearer invalid_token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    public void createReview_InvalidSubject_shouldReturn403() throws Exception{
+        String json = "{\"text\":\"reviewText\",\"rating\":1,\"productId\":1}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                                "Bearer " + JwtTestUtil.generateToken("STRING"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isUnauthorized());
 
     }
