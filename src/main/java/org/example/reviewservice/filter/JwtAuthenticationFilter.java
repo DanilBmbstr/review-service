@@ -5,9 +5,11 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.reviewservice.exception.InvalidUserIdException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,31 +23,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String SECRET_KEY;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal (HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain chain) {
-        try{
+                                    FilterChain chain) throws AuthenticationException{
+
 
         String token = extractToken(request);
 
 
         if (token != null && validateToken(token)) {
-            Long userId = extractUserId(token);
+            try {
+                Long userId = extractUserId(token);
+                Authentication auth = new UsernamePasswordAuthenticationToken(
+                        userId.toString(), null, new ArrayList<>()
+                );
+                SecurityContextHolder.getContext().setAuthentication(auth);
 
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(
-                    userId.toString(), null, new ArrayList<>()
-            );
+                try{
+                    chain.doFilter(request, response);}
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            catch (AuthenticationException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                try {
+                    response.getWriter().write("{\"error\":\"Unauthorized\", \"message\":\"Invalid user id\"}");
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
 
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+
+
+
+
+
+
         }
+        else {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+}
 
-        chain.doFilter(request, response);}
-        catch (Exception ex) {
-            ex.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
     }
 
 
@@ -58,13 +83,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
-    private Long extractUserId(String token){
+    private Long extractUserId(String token) throws AuthenticationException{
         Claims claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return Long.parseLong(claims.get("sub", String.class));
+        try {
+            return Long.parseLong(claims.get("sub", String.class));
+        }
+        catch (NumberFormatException ex){
+            throw new AuthenticationException("Invalid User Id") {
+            };
+        }
+
     }
 
     private Boolean validateToken(String token){
