@@ -18,6 +18,13 @@ public class ReviewMapper {
                 .build();
     }
 
-
+    public Review RequestToReview(CreateReviewRequest request, Long userId){
+        return Review.builder()
+                .text(request.getText())
+                .rating(request.getRating())
+                .userId(userId)
+                .productId(request.getProductId())
+                .build();
+    }
 
 }

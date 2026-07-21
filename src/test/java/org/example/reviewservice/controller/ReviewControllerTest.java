@@ -87,12 +87,13 @@ public class ReviewControllerTest {
 
 
 
-        Review savedReview = new Review();
-        savedReview.setId(userId);
-        savedReview.setText("reviewText");
-        savedReview.setRating(1);
-        savedReview.setProductId((long)1);
-        savedReview.setUserId((long)1);
+        Review savedReview = Review.builder()
+                .id(userId)
+                .text("reviewText")
+                .rating(1)
+                .productId((long)1)
+                .userId((long)1)
+                .build();
         when(mockReviewService.createReview(any(CreateReviewRequest.class), eq(userId))).thenReturn(savedReview);
 
 

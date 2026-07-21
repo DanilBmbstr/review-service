@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Table(name = "reviews")
 @Getter
 @Setter
+@Builder
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
