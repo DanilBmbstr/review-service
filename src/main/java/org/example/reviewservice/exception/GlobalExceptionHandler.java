@@ -51,6 +51,18 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
+
+
+
+    @ExceptionHandler(ProductNotExistsException.class)
+    public ResponseEntity<ProblemDetail> handleProductNotExistsException(ProductNotExistsException ex){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                "Product does not exist"
+        );
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
         };
 
 
