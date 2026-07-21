@@ -5,6 +5,7 @@ package org.example.reviewservice.service;
 import org.example.reviewservice.client.ProductServiceClient;
 import org.example.reviewservice.dto.request.CreateReviewRequest;
 import org.example.reviewservice.entity.Review;
+import org.example.reviewservice.exception.ProductNotExistsException;
 import org.example.reviewservice.mapper.ReviewMapper;
 import org.example.reviewservice.repository.ReviewRepository;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -31,7 +31,7 @@ public class ReviewServiceTest {
     @Mock
     private ProductServiceClient productServiceClient;
 
-
+    private Long UserId = (long)1;
 
     @InjectMocks
     private ReviewService reviewService;
@@ -48,7 +48,7 @@ public class ReviewServiceTest {
     @Test
     public void createReview_correct_input_shouldReturnReview() {
 
-        Long UserId = (long)1;
+
         CreateReviewRequest request = new CreateReviewRequest();
         request.setText("Review Text");
         request.setRating(5);
@@ -64,8 +64,44 @@ public class ReviewServiceTest {
         assertEquals(request.getText(), result.getText());
         assertEquals(request.getProductId(), result.getProductId());
         assertEquals(request.getRating(), result.getRating());
-        verify(mockReviewRepository, times(1)).save(any(Review.class));
+
 
     }
+
+    @Test
+    public void createReview_calls_save_OnlyOneTime(){
+
+        CreateReviewRequest request = new CreateReviewRequest();
+        request.setRating(5);
+        request.setProductId(1);
+
+        when(mockReviewRepository.save(any(Review.class))).thenReturn(ReviewMapper.RequestToReview(request, UserId));
+
+        when(productServiceClient.productExists(any(Long.class))).thenReturn(true);
+
+        Review result = reviewService.createReview(request,UserId);
+        verify(mockReviewRepository, times(1)).save(any(Review.class));
+    }
+
+
+    @Test
+    public void createReview_non_existing_product_shouldThrow_ProductNotExist() {
+
+        Long UserId = (long)1;
+        CreateReviewRequest request = new CreateReviewRequest();
+        request.setText("Review Text");
+        request.setRating(5);
+        request.setProductId(1);
+
+
+        when(productServiceClient.productExists(any(Long.class))).thenReturn(false);
+
+
+
+        assertThrows(ProductNotExistsException.class, ()->{Review result = reviewService.createReview(request,UserId);});
+
+    }
+
+
 }
 
