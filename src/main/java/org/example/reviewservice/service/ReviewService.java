@@ -14,8 +14,7 @@ import java.util.Optional;
 
 @Service
 public class ReviewService {
-    @Autowired
-    ReviewMapper reviewMapper;
+
     @Autowired
     private ProductServiceClient productServiceClient;
     @Autowired
@@ -27,8 +26,8 @@ public class ReviewService {
     public Review createReview(CreateReviewRequest review, long userId) throws ProductNotExistsException{
 
     if(productServiceClient.productExists(review.getProductId())) {
-        Review mappedReview = reviewMapper.RequestToReview(review, userId);
-        return reviewRepository.save(mappedReview);S
+        Review mappedReview = ReviewMapper.RequestToReview(review, userId);
+        return reviewRepository.save(mappedReview);
     }
     else {throw new ProductNotExistsException("Product id:" + review.getProductId());}
     }

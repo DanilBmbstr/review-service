@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReviewMapper {
-    public CreateReviewResponse toResponse(Review review) {
+    public static CreateReviewResponse toResponse(Review review) {
         return CreateReviewResponse.builder()
                 .id(review.getId())
                 .text(review.getText())
@@ -18,7 +18,7 @@ public class ReviewMapper {
                 .build();
     }
 
-    public Review RequestToReview(CreateReviewRequest request, Long userId){
+    public static Review RequestToReview(CreateReviewRequest request, Long userId){
         return Review.builder()
                 .text(request.getText())
                 .rating(request.getRating())
