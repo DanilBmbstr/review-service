@@ -41,6 +41,8 @@ public class ReviewControllerTest {
     ReviewService mockReviewService;
 
 
+    public Long userId = (long)1;
+
 
     private final String TEST_KEY = "EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE";
     @ParameterizedTest
@@ -82,7 +84,7 @@ public class ReviewControllerTest {
     public void createReview_validInput_shouldReturnCreated() throws Exception{
 
 
-        Long userId = (long)1;
+
 
         Review savedReview = new Review();
         savedReview.setId(userId);
@@ -137,6 +139,40 @@ public class ReviewControllerTest {
 
     }
 
+    @Test
+    public void createReview_Rating_Less_Than_1_shouldReturnBadRequest() throws Exception{
 
-   // @Test createReview
+        String json = "{\"text\":\"reviewText\",\"rating\":0,\"productId\":1}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                                "Bearer " +  JwtTestUtil.generateToken(userId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+
+
+        verify(mockReviewService, times(0)).createReview(any(CreateReviewRequest.class), eq(userId));
+
+
+    }
+
+
+    @Test
+    public void createReview_Rating_More_Than_10_shouldReturnBadRequest() throws Exception{
+
+        String json = "{\"text\":\"reviewText\",\"rating\":11,\"productId\":1}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                                "Bearer " +  JwtTestUtil.generateToken(userId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+
+
+        verify(mockReviewService, times(0)).createReview(any(CreateReviewRequest.class), eq(userId));
+
+
+    }
+
+
 }

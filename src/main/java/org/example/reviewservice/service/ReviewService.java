@@ -18,11 +18,8 @@ public class ReviewService {
         return reviewRepository.findAll();
     }
 
-    public Review createReview(CreateReviewRequest review, long userId) throws IllegalArgumentException{
+    public Review createReview(CreateReviewRequest review, long userId){
 
-        if(review.getRating() < 1 || review.getRating() > 10) {
-            throw new IllegalRatingException("Rating should be between 1 and 10");
-        }
 
         Review mappedReview = new Review();
         mappedReview.setUserId(userId);
