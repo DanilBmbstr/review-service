@@ -4,6 +4,7 @@ package org.example.reviewservice.controller;
 import org.example.reviewservice.config.SecurityConfig;
 import org.example.reviewservice.dto.request.CreateReviewRequest;
 import org.example.reviewservice.entity.Review;
+import org.example.reviewservice.exception.ProductNotExistsException;
 import org.example.reviewservice.filter.JwtAuthenticationFilter;
 import org.example.reviewservice.mapper.ReviewMapper;
 import org.example.reviewservice.service.ReviewService;
@@ -174,5 +175,16 @@ public class ReviewControllerTest {
 
     }
 
+    @Test
+    public void createReview_ProductNotExists_shouldReturn404() throws Exception{
+        when(mockReviewService.createReview(any(CreateReviewRequest.class), eq(userId))).thenThrow(ProductNotExistsException.class);
+        String json = "{\"text\":\"reviewText\",\"rating\":5,\"productId\":555}";
+        mockMvc.perform(post("/api/reviews").header("Authorization",
+                                "Bearer " +  JwtTestUtil.generateToken(userId.toString()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+
+    }
 
 }
