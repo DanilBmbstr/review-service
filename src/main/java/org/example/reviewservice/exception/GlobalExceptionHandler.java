@@ -1,5 +1,6 @@
 package org.example.reviewservice.exception;
 
+import io.jsonwebtoken.io.SerialException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -62,6 +63,32 @@ public class GlobalExceptionHandler {
         );
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
+    }
+
+
+    @ExceptionHandler(SerialException.class)
+    public ResponseEntity<ProblemDetail> handeKafkaProducerNotWorkingException(SerialException ex){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Failed serialize review"
+        );
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        problemDetail.setProperty("Message", ex.getCause().getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+
+    }
+
+
+    @ExceptionHandler(KafkaProducerException.class)
+    public ResponseEntity<ProblemDetail> handeKafkaProducerNotWorkingException(KafkaProducerException ex){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Failed to send kafka message"
+        );
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        problemDetail.setProperty("Message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
+
     }
         };
 
