@@ -2,6 +2,9 @@ package org.example.reviewservice.service;
 
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.reviewservice.client.ProductServiceClient;
 import org.example.reviewservice.dto.request.CreateReviewRequest;
 import org.example.reviewservice.entity.Review;
@@ -28,6 +31,11 @@ public class ReviewServiceTest {
     @Mock
     private ReviewRepository mockReviewRepository;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private KafkaProducerService kafkaProducerService;
     @Mock
     private ProductServiceClient productServiceClient;
 

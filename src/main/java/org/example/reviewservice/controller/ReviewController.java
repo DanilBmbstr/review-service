@@ -32,6 +32,7 @@ public class ReviewController {
     public ResponseEntity<CreateReviewResponse> createReview(@Valid @RequestBody CreateReviewRequest review,
                                                              Authentication authentication)
     {
+
         String userIdString = authentication.getPrincipal().toString();
         Long userId = Long.parseLong(userIdString);
 
@@ -42,6 +43,7 @@ public class ReviewController {
                 .status(HttpStatus.CREATED)
                 .header("Location", "/api/reviews/" + saved.getId())
                 .body(response);
+
 
 
     }

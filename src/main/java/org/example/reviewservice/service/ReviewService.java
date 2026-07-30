@@ -23,10 +23,10 @@ public class ReviewService {
     private final KafkaProducerService producerService;
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServer;
-    @Autowired
-    private ProductServiceClient productServiceClient;
-    @Autowired
-    private ReviewRepository reviewRepository;
+
+    private final ProductServiceClient productServiceClient;
+
+    private final ReviewRepository reviewRepository;
 
     private final ObjectMapper objectMapper;
 
